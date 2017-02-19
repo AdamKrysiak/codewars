@@ -31,7 +31,7 @@ class Brainfuck_mashine:
 
     def output_byte(self):
         # sys.stdout.write(chr(self.tape[self.pointer]))
-        self.out_str += ""+chr(self.tape[self.pointer])
+        self.out_str += chr(self.tape[self.pointer])
 
     def input_byte(self):
         self.tape[self.pointer] = ord(self.input[0])
@@ -47,9 +47,7 @@ class Brainfuck_mashine:
             self.code[self.code_ptr:] = self.safe_copy_of_code[self.code_ptr:]
 
     def add_open(self):
-        if self.code_ptr in self.while_open_list:
-            pass
-        else:
+        if self.code_ptr not in self.while_open_list:
             self.while_open_list.append(self.code_ptr)
 
         if self.tape[self.pointer] == 0:
@@ -65,14 +63,19 @@ class Brainfuck_mashine:
         return self.code[self.code_ptr]
 
     def interprete(self, code="", input=""):
+        self.tape = [0] * 256
+        self.pointer = 0
+        self.code_ptr = 0
         self.safe_copy_of_code = list(code) + [';']
         self.code = list(code) + [';']
         self.input = list(input)
+        self.out_str = ""
         while self.get_next_code() != ';':
             temp = self.code[self.code_ptr:]
             actual_instruction = self.code[self.code_ptr]
             self.function_map[self.code[self.code_ptr]]()
             self.code_ptr += 1
+        print self.tape[:15]
         return self.out_str
 
 
@@ -80,9 +83,52 @@ def brain_luck(code, input_code):
     print(code, input_code)
     x = Brainfuck_mashine()
     score = x.interprete(code, input_code)
-    print format(ord(score[0]), '02x')
     return score
 
 
 if __name__ == '__main__':
-    print brain_luck(',>,<[>[->+>+<<]>>[-<<+>>]<<<-]>>.', '\x08\t')
+    print brain_luck(',>+>>>>++++++++++++++++++++++++++++++++++++++++++++>++++++++++++++++++++++++++++++++<<<<<<[>[>>>>>>+>+<<<<<<<-]>>>>>>>[<<<<<<<+>>>>>>>-]<[>++++++++++[-<-[>>+>+<<<-]>>>[<<<+>>>-]+<[>[-]<[-]]>[<<[>>>+<<<-]>>[-]]<<]>>>[>>+>+<<<-]>>>[<<<+>>>-]+<[>[-]<[-]]>[<<+>>[-]]<<<<<<<]>>>>>[++++++++++++++++++++++++++++++++++++++++++++++++.[-]]++++++++++<[->-<]>++++++++++++++++++++++++++++++++++++++++++++++++.[-]<<<<<<<<<<<<[>>>+>+<<<<-]>>>>[<<<<+>>>>-]<-[>>.>.<<<[-]]<<[>>+>+<<<-]>>>[<<<+>>>-]<<[<+>-]>[<+>-]<<<-]', '\n')
+
+# '11, 11, 2(, 3\x1f, 5\r, 8\xf2, =\xc5, E}, R\x08, gK, ' should equal '1, 1, 2, 3, 5, 8, 13, 21, 34, 55'
+# ',>+(4>)(44+)>(32+)(6<)
+    # [
+    #   >[(6>)+>+(7<)-]
+    #    (7>)
+    #    [(7<)+(7>)-]<
+    #    [>(10+)
+    #       [-<-
+    #           [>>+>+<<<-]
+    #           (3>)[<<<+>>>-]
+    #           +<
+    #           [>[-]<[-]]
+    #           >[
+    #               <<
+    #               [>>>+<<<-]
+    #               >>[-]
+    #           ]<<
+    #       ]>>>
+    #       [>>+>+<<<-]
+    #       >>>
+    #       [<<<+>>>-]
+    #       +<
+    #       [>[-]<[-]]
+    #       >[<<+>>[-]]
+    #       (7<)
+    #    ]
+    #    (5>)
+    #    [(48+).[-]]
+    #    (10+)<
+    #    [->-<]
+    #    >(48+).[-](12<)
+    #    [>>>+>+<<<<-]
+    #    >>>>
+    #    [<<<<+>>>>-]
+    #    <-
+    #    [>>.>.<<<[-]]
+    #    <<[>>+>+<<<-]
+    #    >>>[<<<+>>>-]
+    #    <<[<+>-]
+    #    >
+    #    [<+>-]<<<-
+    # ]
+    #    ', '\n'
